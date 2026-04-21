@@ -8,6 +8,8 @@ jobs:
   deploy-frontend:
     name: Deploy to Azure Static Web Apps
     runs-on: ubuntu-latest
+    # Skip until Azure secrets are configured
+    if: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN != '' }}
     steps:
       - uses: actions/checkout@v4
 
@@ -25,8 +27,6 @@ jobs:
           VITE_SOCKET_URL: ${{ secrets.VITE_SOCKET_URL }}
           VITE_STRIPE_PUBLISHABLE_KEY: ${{ secrets.VITE_STRIPE_PUBLISHABLE_KEY }}
 
-      # Azure Static Web Apps action handles upload + CDN purge automatically.
-      # Add your deployment token in GitHub Settings > Secrets > AZURE_STATIC_WEB_APPS_API_TOKEN
       - name: Deploy to Azure Static Web Apps
         uses: Azure/static-web-apps-deploy@v1
         with:
@@ -39,6 +39,8 @@ jobs:
   deploy-server:
     name: Deploy to Azure App Service
     runs-on: ubuntu-latest
+    # Skip until Azure secrets are configured
+    if: ${{ secrets.AZURE_APP_SERVICE_PUBLISH_PROFILE != '' }}
     steps:
       - uses: actions/checkout@v4
 
@@ -52,11 +54,9 @@ jobs:
           npm ci --workspace=server
           npm run build:server
 
-      # Azure App Service action — add publish profile in GitHub Secrets
-      # Get it from: Azure Portal > App Service > Overview > Get publish profile
       - name: Deploy to Azure App Service
         uses: azure/webapps-deploy@v3
         with:
-          app-name: formflow-server          # Change to your App Service name
+          app-name: formflow-server
           publish-profile: ${{ secrets.AZURE_APP_SERVICE_PUBLISH_PROFILE }}
           package: server
