@@ -1,15 +1,14 @@
 name: Deploy — Merge to main
 
 on:
-  push:
-    branches: [main]
+  workflow_dispatch:
+    # Triggered manually from GitHub Actions tab.
+    # Switch back to "push: branches: [main]" once Azure secrets are configured.
 
 jobs:
   deploy-frontend:
     name: Deploy to Azure Static Web Apps
     runs-on: ubuntu-latest
-    # Skip until Azure secrets are configured
-    if: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN != '' }}
     steps:
       - uses: actions/checkout@v4
 
@@ -39,8 +38,6 @@ jobs:
   deploy-server:
     name: Deploy to Azure App Service
     runs-on: ubuntu-latest
-    # Skip until Azure secrets are configured
-    if: ${{ secrets.AZURE_APP_SERVICE_PUBLISH_PROFILE != '' }}
     steps:
       - uses: actions/checkout@v4
 
