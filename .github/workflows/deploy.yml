@@ -1,0 +1,62 @@
+name: Deploy — Merge to main
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy-frontend:
+    name: Deploy to Azure Static Web Apps
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install & build web
+        run: |
+          npm ci --workspace=apps/web
+          npm run build:web
+        env:
+          VITE_API_URL: ${{ secrets.VITE_API_URL }}
+          VITE_SOCKET_URL: ${{ secrets.VITE_SOCKET_URL }}
+          VITE_STRIPE_PUBLISHABLE_KEY: ${{ secrets.VITE_STRIPE_PUBLISHABLE_KEY }}
+
+      # Azure Static Web Apps action handles upload + CDN purge automatically.
+      # Add your deployment token in GitHub Settings > Secrets > AZURE_STATIC_WEB_APPS_API_TOKEN
+      - name: Deploy to Azure Static Web Apps
+        uses: Azure/static-web-apps-deploy@v1
+        with:
+          azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN }}
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          action: upload
+          app_location: /
+          output_location: apps/web/dist
+
+  deploy-server:
+    name: Deploy to Azure App Service
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install & build server
+        run: |
+          npm ci --workspace=server
+          npm run build:server
+
+      # Azure App Service action — add publish profile in GitHub Secrets
+      # Get it from: Azure Portal > App Service > Overview > Get publish profile
+      - name: Deploy to Azure App Service
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: formflow-server          # Change to your App Service name
+          publish-profile: ${{ secrets.AZURE_APP_SERVICE_PUBLISH_PROFILE }}
+          package: server

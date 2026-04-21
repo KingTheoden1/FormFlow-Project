@@ -1,0 +1,27 @@
+{
+  "name": "formflow",
+  "version": "0.0.1",
+  "private": true,
+  "workspaces": [
+    "apps/web",
+    "apps/embed",
+    "server"
+  ],
+  "scripts": {
+    "dev:web": "npm run dev --workspace=apps/web",
+    "dev:server": "npm run dev --workspace=server",
+    "dev": "concurrently \"npm run dev:web\" \"npm run dev:server\"",
+    "build:web": "npm run build --workspace=apps/web",
+    "build:embed": "npm run build --workspace=apps/embed",
+    "build:server": "npm run build --workspace=server",
+    "build": "npm run build:web && npm run build:embed && npm run build:server",
+    "test:web": "npm run test --workspace=apps/web",
+    "test:server": "npm run test --workspace=server",
+    "test": "npm run test:web && npm run test:server",
+    "storybook": "npm run storybook --workspace=apps/web",
+    "lint": "eslint . --ext .ts,.tsx"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}
