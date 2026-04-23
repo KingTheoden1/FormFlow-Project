@@ -5,9 +5,12 @@ import DashboardPage from '@/pages/DashboardPage'
 import BuilderPage from '@/pages/BuilderPage'
 import ResponsesPage from '@/pages/ResponsesPage'
 
-// Placeholder protected route wrapper — will add proper auth guard next milestone
+// Guards a route — redirects to /login if no token is present.
+// In development (npm run dev), this check is bypassed so you can work on
+// the UI without needing a running backend.
 function RequireAuth({ children }: { children: React.ReactNode }) {
   const token = useAppSelector((s) => s.auth.token)
+  if (import.meta.env.DEV) return <>{children}</>
   if (!token) return <Navigate to="/login" replace />
   return <>{children}</>
 }
