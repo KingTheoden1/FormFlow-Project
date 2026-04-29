@@ -30,7 +30,10 @@ function hashIp(ip: string): string {
 // ── POST /api/forms/:formId/submissions ───────────────────────
 router.post('/:formId/submissions', async (req: Request, res: Response): Promise<void> => {
   const formId = req.params['formId'] as string
-  const body = req.body as { data?: Record<string, unknown> }
+  const body = req.body as {
+    data?: Record<string, unknown>
+    paymentIntentId?: string
+  }
 
   if (!body.data || typeof body.data !== 'object') {
     res.status(400).json({ message: 'Submission data is required' })
@@ -52,7 +55,7 @@ router.post('/:formId/submissions', async (req: Request, res: Response): Promise
       ''
     const ipHash = rawIp ? hashIp(rawIp) : undefined
 
-    const submission = await submissions.create(formId, body.data, ipHash)
+    const submission = await submissions.create(formId, body.data, ipHash, body.paymentIntentId)
 
     // Emit to Socket.io so the dashboard updates in real time (M6)
     // The io instance is exported from index.ts
