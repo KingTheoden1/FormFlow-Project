@@ -21,6 +21,7 @@ import StepTabs from './StepTabs'
 import FormCanvas from './FormCanvas'
 import FieldEditor from './FieldEditor'
 import LivePreview from '@/features/preview/components/LivePreview'
+import PaymentStepEditor from './PaymentStepEditor'
 
 export default function BuilderLayout() {
   const dispatch = useAppDispatch()
@@ -85,6 +86,8 @@ export default function BuilderLayout() {
           aria-label="Field types"
         >
           <FieldPalette />
+          {/* Payment settings sit below the field palette in the same sidebar */}
+          <PaymentStepEditor />
         </aside>
 
         {/* Center — step tabs + field canvas */}
