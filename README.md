@@ -2,6 +2,13 @@
 
 An accessible, embeddable form builder with optional Stripe payments. Build multi-step forms visually, embed them anywhere with a `<script>` tag, and watch submissions arrive in real time.
 
+> **Built with [Claude Code](https://claude.ai/code)** — Anthropic's AI coding assistant was used throughout this project to accelerate development across the full stack. Specific areas where it helped:
+> - Designed the **JWT auth flow** (15-minute access tokens in Redux memory, 7-day refresh tokens in HttpOnly cookies with SHA-256 hashing and automatic rotation)
+> - Implemented the **Stripe payment integration** — PaymentIntent creation, Stripe Elements embed, and HMAC webhook signature verification with raw body capture
+> - Built the **Shadow DOM embed widget**, including the full CSS isolation strategy so the embedded form can't be broken by host-page styles
+> - Caught and fixed several **security details**: timing-attack-safe login, IP address hashing before storage, parameterized SQL queries throughout, and cookie flags (HttpOnly, Secure, SameSite=Strict)
+> - Architected the **lazy singleton pattern** for both the database pool and the Stripe SDK so the server starts cleanly without requiring all environment variables at boot time
+
 ---
 
 ## Architecture
