@@ -16,9 +16,12 @@ import EmbedForm from './EmbedForm'
 interface Props {
   formId: string
   apiUrl: string
+  // Stripe publishable key — read from data-stripe-key on the <script> tag.
+  // Optional: forms without a payment step work fine without it.
+  stripeKey?: string
 }
 
-export default function EmbedApp({ formId, apiUrl }: Props) {
+export default function EmbedApp({ formId, apiUrl, stripeKey }: Props) {
   const [form,    setForm]    = useState<FormDefinition | null>(null)
   const [loading, setLoading] = useState(true)
   const [error,   setError]   = useState<string | null>(null)
@@ -56,5 +59,5 @@ export default function EmbedApp({ formId, apiUrl }: Props) {
     )
   }
 
-  return <EmbedForm form={form} apiUrl={apiUrl} />
+  return <EmbedForm form={form} apiUrl={apiUrl} stripeKey={stripeKey} />
 }

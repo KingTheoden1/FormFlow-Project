@@ -244,18 +244,28 @@ export const submissions = {
   async create(
     formId: string,
     data: Record<string, unknown>,
-    ipHash?: string
+    ipHash?: string,
+    paymentIntentId?: string
   ): Promise<SubmissionRow> {
     const pool = await getPool()
     const id = uuidv4()
+    // When a paymentIntentId is provided the status starts as 'pending'.
+    // The Stripe webhook will update it to 'paid' or 'failed' once Stripe
+    // confirms the charge.
+    const paymentStatus = paymentIntentId ? 'pending' : null
     await pool
       .request()
-      .input('id',       sql.UniqueIdentifier,    id)
-      .input('form_id',  sql.UniqueIdentifier,    formId)
-      .input('data',     sql.NVarChar(sql.MAX),   JSON.stringify(data))
-      .input('ip_hash',  sql.NVarChar(64),        ipHash ?? null)
+      .input('id',                       sql.UniqueIdentifier, id)
+      .input('form_id',                  sql.UniqueIdentifier, formId)
+      .input('data',                     sql.NVarChar(sql.MAX), JSON.stringify(data))
+      .input('ip_hash',                  sql.NVarChar(64),     ipHash ?? null)
+      .input('stripe_payment_intent_id', sql.NVarChar(255),    paymentIntentId ?? null)
+      .input('payment_status',           sql.NVarChar(50),     paymentStatus)
       .query(
-        'INSERT INTO submissions (id, form_id, data, ip_hash) VALUES (@id, @form_id, @data, @ip_hash)'
+        `INSERT INTO submissions
+           (id, form_id, data, ip_hash, stripe_payment_intent_id, payment_status)
+         VALUES
+           (@id, @form_id, @data, @ip_hash, @stripe_payment_intent_id, @payment_status)`
       )
 
     const result = await pool
@@ -265,6 +275,22 @@ export const submissions = {
     const created = result.recordset[0]
     if (!created) throw new Error('Submission creation failed')
     return created
+  },
+
+  // Called by the Stripe webhook when payment_intent.succeeded or
+  // payment_intent.payment_failed fires.  Finds the submission that was
+  // created with this paymentIntentId and updates its status.
+  async updatePaymentStatus(paymentIntentId: string, status: string): Promise<void> {
+    const pool = await getPool()
+    await pool
+      .request()
+      .input('stripe_payment_intent_id', sql.NVarChar(255), paymentIntentId)
+      .input('payment_status',           sql.NVarChar(50),  status)
+      .query(
+        `UPDATE submissions
+         SET payment_status = @payment_status
+         WHERE stripe_payment_intent_id = @stripe_payment_intent_id`
+      )
   },
 
   async listByFormId(formId: string): Promise<SubmissionRow[]> {

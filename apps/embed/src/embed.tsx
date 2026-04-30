@@ -40,7 +40,12 @@ declare global {
   }
 }
 
-function mountEmbed(container: HTMLElement, formId: string, apiUrl: string): void {
+function mountEmbed(
+  container: HTMLElement,
+  formId: string,
+  apiUrl: string,
+  stripeKey: string | undefined
+): void {
   // attachShadow creates the isolated DOM tree.
   // mode: 'open' means JavaScript on the host page CAN still access
   // the shadow DOM via element.shadowRoot — acceptable for a form widget.
@@ -58,7 +63,7 @@ function mountEmbed(container: HTMLElement, formId: string, apiUrl: string): voi
 
   ReactDOM.createRoot(mountPoint).render(
     <React.StrictMode>
-      <EmbedApp formId={formId} apiUrl={apiUrl} />
+      <EmbedApp formId={formId} apiUrl={apiUrl} stripeKey={stripeKey} />
     </React.StrictMode>
   )
 }
@@ -68,17 +73,24 @@ function init(): void {
   // document.currentScript points to the <script> element that is
   // currently executing — it's only available during the initial run.
   const scriptTag = document.currentScript as HTMLScriptElement | null
+
   const apiUrl =
     scriptTag?.getAttribute('data-api-url') ??
     window.FORMFLOW_API_URL ??
     ''
+
+  // data-stripe-key is the Stripe publishable key (pk_test_... / pk_live_...).
+  // Only needed on pages with payment-enabled forms.  Non-payment forms work
+  // without it.  Never use the secret key here — publishable keys are safe
+  // to include in page source.
+  const stripeKey = scriptTag?.getAttribute('data-stripe-key') ?? undefined
 
   // Find every container element that has a data-form-id attribute
   // and mount an embed inside each one.
   const containers = document.querySelectorAll<HTMLElement>('[data-form-id]')
   containers.forEach((el) => {
     const formId = el.getAttribute('data-form-id')
-    if (formId) mountEmbed(el, formId, apiUrl)
+    if (formId) mountEmbed(el, formId, apiUrl, stripeKey)
   })
 }
 

@@ -267,6 +267,19 @@ export const EMBED_STYLES = `
     font-family: system-ui, sans-serif;
   }
 
+  /* ── Payment step ───────────────────────────────────────────── */
+  .ff-payment-amount {
+    margin-bottom: 16px;
+    font-size: 1rem;
+    color: #374151;
+    font-family: system-ui, sans-serif;
+  }
+
+  /* Wrapper that gives the Stripe iframe room to breathe */
+  .ff-payment-element {
+    margin-bottom: 16px;
+  }
+
   /* ── Submit error banner ────────────────────────────────────── */
   .ff-submit-error {
     margin-top: 12px;
