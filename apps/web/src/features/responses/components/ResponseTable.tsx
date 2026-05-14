@@ -35,12 +35,12 @@ function PaymentBadge({ status }: { status?: string }) {
   if (!status) return <span className="text-gray-400 text-xs">—</span>
 
   const styles: Record<string, string> = {
-    paid:    'bg-green-100 text-green-700',
-    pending: 'bg-yellow-100 text-yellow-700',
-    failed:  'bg-red-100   text-red-700',
+    succeeded: 'bg-green-100 text-green-700',
+    pending:   'bg-yellow-100 text-yellow-700',
+    failed:    'bg-red-100   text-red-700',
   }
   const label: Record<string, string> = {
-    paid: '✓ Paid', pending: '⏳ Pending', failed: '✗ Failed',
+    succeeded: '✓ Paid', pending: '⏳ Pending', failed: '✗ Failed',
   }
 
   return (
